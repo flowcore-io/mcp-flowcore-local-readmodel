@@ -26,6 +26,7 @@ export async function initializeDuckDB(
 
 export async function closeDuckDB() {
   if (db) {
+    await connection?.close()
     await db.close()
   }
 }
