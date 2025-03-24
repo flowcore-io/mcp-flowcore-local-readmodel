@@ -6,6 +6,7 @@ import { parseArgs } from "node:util"
 import { z } from "zod"
 import pkg from "../package.json"
 import {
+  closeDuckDBHandler,
   createEventProjectorHandler,
   createProjectionTableHandler,
   getAllStreamsHandler,
@@ -13,11 +14,12 @@ import {
   initializeDuckDBHandler,
   queryDatabaseHandler,
   startEventStreamProjectionHandler,
+  stopEventStreamProjectionHandler,
 } from "./tools/duckdb-tools"
 import { exchangePat } from "./utils/pat-exchange"
 
 // Parse command line arguments
-const { values: parsedValues, positionals } = parseArgs({
+const { values: parsedValues } = parseArgs({
   // Use process.argv if Bun is not available
   args: typeof Bun !== "undefined" ? Bun.argv : process.argv,
   options: {
@@ -26,11 +28,6 @@ const { values: parsedValues, positionals } = parseArgs({
   },
   allowPositionals: true,
 })
-
-// Log positional arguments if any (for debugging)
-if (positionals.length > 0) {
-  console.warn(`Warning: Unexpected positional arguments: ${positionals.join(", ")}`)
-}
 
 const username = parsedValues.username as string
 const pat = parsedValues.pat as string
@@ -52,11 +49,25 @@ const server = new McpServer({
 // Register DuckDB tools
 server.tool(
   "initialize_duckdb",
-  "Initialize an in-memory DuckDB database for the read model, only use a file path if you want to persist the database, for quick analytics, use in-memory database as it is faster",
+  "Initialize an in-memory DuckDB database for the read model",
   {
-    databaseFile: z.string().optional().describe("Path to the DuckDB database file, defaults to in-memory database"),
+    file: z.string().optional().describe("File path to the DuckDB database file"),
   },
   initializeDuckDBHandler(),
+)
+
+server.tool(
+  "close_duckdb",
+  "Close the DuckDB database, this will stop the event stream projection. If the database is in-memory it will be lost.",
+  {},
+  closeDuckDBHandler(),
+)
+
+server.tool(
+  "stop_event_stream_projection",
+  "Stop the event stream projection for a given stream ID",
+  { streamId: z.string().describe("ID of the stream to stop") },
+  stopEventStreamProjectionHandler(),
 )
 
 server.tool(
@@ -137,16 +148,17 @@ server.tool(
 
 4. Example Function Structure:
 <example js code>
-export function projectEvent(event) {
+function projectEvent(event) {
     return {
         id: event.id,
         timestamp: new Date(event.timestamp).toISOString(),
-        amount: parseFloat(event.amount).toFixed(2),
+        amount: Number.parseFloat(event.amount).toFixed(2),
         status: String(event.status).toLowerCase(),
         metadata: JSON.stringify(event.metadata),
         is_active: Boolean(event.active)
     };
 }
+module.exports = projectEvent;
 </example js code>
   `,
   {
@@ -163,7 +175,7 @@ server.tool(
   "Start streaming events from Flowcore and projecting them to the database",
   {
     tenant: z.string().describe("Tenant name"),
-    dataCoreId: z.string().describe("ID of the data core (UUID)"),
+    dataCore: z.string().describe("Name of the data core"),
     flowTypeName: z.string().describe("Name of the flow type"),
     eventTypeName: z.string().describe("Name of the event type"),
     startDate: z.string().describe("Start date for event streaming"),

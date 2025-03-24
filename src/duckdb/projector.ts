@@ -26,18 +26,33 @@ export async function createEventProjector(name: string, absoluteFilePath: strin
   // Create a unique ID for the projector
   const projectorId = `${name}-${Date.now()}`
 
-  const projectorFunction = await import(absoluteFilePath)
+  try {
+    const projectorFunction = await import(absoluteFilePath)
 
-  // Store the projector info
-  projectors[name] = {
-    name,
-    function: projectorFunction.default as ProjectionFunction,
-  }
+    if (!projectorFunction.default && projectorFunction.projectEvent) {
+      // Store the projector info
+      projectors[name] = {
+        name,
+        function: projectorFunction.projectEvent as ProjectionFunction,
+      }
+    } else if (projectorFunction.default) {
+      // Store the projector info
+      projectors[name] = {
+        name,
+        function: projectorFunction.default as ProjectionFunction,
+      }
+    } else {
+      throw new Error(`No valid projector function found in ${absoluteFilePath}`)
+    }
 
-  return {
-    success: true,
-    projectorId,
-    name,
+    return {
+      success: true,
+      projectorId,
+      name,
+    }
+  } catch (error) {
+    console.error(`Failed to create event projector '${name}' from ${absoluteFilePath}:`, error)
+    throw error
   }
 }
 
@@ -47,7 +62,8 @@ export async function createEventProjector(name: string, absoluteFilePath: strin
  * @returns The projector or undefined if not found
  */
 export function getProjectorByName(name: string): ProjectorInfo | undefined {
-  return projectors[name]
+  const projector = projectors[name]
+  return projector
 }
 
 /**

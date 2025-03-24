@@ -17,6 +17,7 @@
         "aws-sdk": "^2.1692.0",
         "dayjs": "^1.11.13",
         "duckdb": "^1.2.0",
+        "duckdb-async": "^1.2.0",
         "jwt-decode": "^4.0.0",
         "mock-aws-s3": "^4.0.2",
         "nock": "^14.0.1",
@@ -208,6 +209,8 @@
     "detect-libc": ["detect-libc@2.0.3", "", {}, "sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw=="],
 
     "duckdb": ["duckdb@1.2.0", "", { "dependencies": { "@mapbox/node-pre-gyp": "^2.0.0", "node-addon-api": "^7.0.0", "node-gyp": "^9.3.0" } }, "sha512-zAHHRTMoZhWIwvOsyNkgV9c1nq0gR0j+ZyX0uTCRFZTNOlYO4lnErP5Fddt/6iKMXsTNL9v1oTG9E76S5jMh7w=="],
+
+    "duckdb-async": ["duckdb-async@1.2.0", "", { "dependencies": { "duckdb": "^1.2.0" } }, "sha512-Ri8PL/TGZRhbW+53a/zqD4nJdH3p+mRB6owb7Hl5tXu3e1rvXVLil543aiVEnVKKxSHSBUwHyoutt+rOHrhc6g=="],
 
     "dunder-proto": ["dunder-proto@1.0.1", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.1", "es-errors": "^1.3.0", "gopd": "^1.2.0" } }, "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A=="],
 

@@ -9,9 +9,11 @@ dayjs.extend(utc)
 // Store active streams
 const activeStreams: Record<string, StreamInfo> = {}
 
+const activeDataPumps: Record<string, FlowcoreDataPump> = {}
+
 interface StreamInfo {
   id: string
-  status: "INITIALIZING" | "RUNNING" | "COMPLETED" | "ERROR"
+  status: "INITIALIZING" | "RUNNING" | "COMPLETED" | "ERROR" | "STOPPED"
   eventCount: number
   tenant: string
   dataCore: string
@@ -104,11 +106,10 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
 
   try {
     streamInfo.status = "RUNNING"
-
     const startState = getState(streamInfo.startDate)
     const endState = getState(streamInfo.endDate)
 
-    const dataPump = FlowcoreDataPump.create({
+    activeDataPumps[streamId] = FlowcoreDataPump.create({
       auth: {
         getBearerToken: async () => await getBearerToken(),
       },
@@ -133,10 +134,21 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
             return
           }
 
+          let successCount = 0
+          let errorCount = 0
+
           for (const event of events) {
-            const projectionResult = await projectEvent(event, streamInfo.targetTable, streamInfo.projectorName)
-            if (projectionResult.success) {
-              streamInfo.eventCount++
+            try {
+              const projectionResult = await projectEvent(event, streamInfo.targetTable, streamInfo.projectorName)
+
+              if (projectionResult.success) {
+                successCount++
+                streamInfo.eventCount++
+              } else {
+                errorCount++
+              }
+            } catch (error) {
+              errorCount++
             }
           }
         },
@@ -148,7 +160,7 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
       logger: console,
     })
 
-    await dataPump.start((error?: Error) => {
+    await activeDataPumps[streamId].start((error?: Error) => {
       if (error) {
         streamInfo.status = "ERROR"
         streamInfo.error = `${error}`
@@ -160,6 +172,28 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
     streamInfo.status = "ERROR"
     streamInfo.error = `${error}`
     throw error
+  }
+}
+
+export function stopEventStreamProjection(streamId: string) {
+  const streamInfo = activeStreams[streamId]
+
+  if (!streamInfo) {
+    throw new Error(`Stream ${streamId} not found`)
+  }
+
+  if (!activeDataPumps[streamId]) {
+    throw new Error(`Data pump for stream ${streamId} not found`)
+  }
+
+  streamInfo.status = "STOPPED"
+
+  activeDataPumps[streamId].stop()
+}
+
+export function stopAllEventStreamProjections() {
+  for (const streamId in activeStreams) {
+    stopEventStreamProjection(streamId)
   }
 }
 

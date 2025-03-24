@@ -1,43 +1,64 @@
-import { createTableWithSQL, initializeDuckDB, queryDatabase } from "../duckdb"
+import { closeDuckDB, createTableWithSQL, initializeDuckDB, queryDatabase } from "../duckdb"
 import { createEventProjector } from "../duckdb/projector"
-import { getAllStreams, getStreamInfo, startEventStreamProjection } from "../duckdb/stream"
+import {
+  getAllStreams,
+  getStreamInfo,
+  startEventStreamProjection,
+  stopAllEventStreamProjections,
+  stopEventStreamProjection,
+} from "../duckdb/stream"
 
 // Initialize DuckDB handler
-export const initializeDuckDBHandler = () =>
-  ({ databaseFile }: { databaseFile?: string }) => {
+export const initializeDuckDBHandler =
+  () =>
+  async ({ file }: { file?: string }) => {
     try {
-      const result = initializeDuckDB(databaseFile)
+      const result = await initializeDuckDB(file)
 
-    return {
-      content: [
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result),
+          },
+        ],
+      }
+    } catch (error) {
+      const content = [
         {
           type: "text" as const,
-          text: JSON.stringify(result),
+          text: JSON.stringify(`Failed to initialize DuckDB with error: ${error}`),
         },
-      ],
+      ]
+
+      return { isError: true, content }
+    }
+  }
+
+export const closeDuckDBHandler = () => async () => {
+  try {
+    stopAllEventStreamProjections()
+    await closeDuckDB()
+
+    return {
+      content: [{ type: "text" as const, text: "DuckDB closed successfully" }],
     }
   } catch (error) {
-    const content = [
-      {
-        type: "text" as const,
-        text: JSON.stringify(`Failed to initialize DuckDB with error: ${error}`),
-      },
-    ]
+    const content = [{ type: "text" as const, text: `Failed to close DuckDB with error: ${error}` }]
 
     return { isError: true, content }
   }
 }
-
 // Create Table With SQL handler
 export const createProjectionTableHandler =
   () =>
-  ({
+  async ({
     createTableSQL,
   }: {
     createTableSQL: string
   }) => {
     try {
-      const result = createTableWithSQL(createTableSQL)
+      const result = await createTableWithSQL(createTableSQL)
 
       return {
         content: [
@@ -62,7 +83,7 @@ export const createProjectionTableHandler =
 // Create Event Projector handler
 export const createEventProjectorHandler =
   () =>
-  ({
+  async ({
     name,
     absoluteFilePath,
   }: {
@@ -70,7 +91,7 @@ export const createEventProjectorHandler =
     absoluteFilePath: string
   }) => {
     try {
-      const result = createEventProjector(name, absoluteFilePath)
+      const result = await createEventProjector(name, absoluteFilePath)
 
       return {
         content: [
@@ -97,7 +118,7 @@ export const startEventStreamProjectionHandler =
   (getBearerToken: () => Promise<string>) =>
   async ({
     tenant,
-    dataCoreId,
+    dataCore,
     flowTypeName,
     eventTypeName,
     startDate,
@@ -107,7 +128,7 @@ export const startEventStreamProjectionHandler =
     maxParallelism,
   }: {
     tenant: string
-    dataCoreId: string
+    dataCore: string
     flowTypeName: string
     eventTypeName: string
     startDate: string
@@ -120,7 +141,7 @@ export const startEventStreamProjectionHandler =
       const result = await startEventStreamProjection(
         getBearerToken,
         tenant,
-        dataCoreId,
+        dataCore,
         flowTypeName,
         eventTypeName,
         startDate,
@@ -150,12 +171,28 @@ export const startEventStreamProjectionHandler =
     }
   }
 
+export const stopEventStreamProjectionHandler =
+  () =>
+  ({ streamId }: { streamId: string }) => {
+    try {
+      stopEventStreamProjection(streamId)
+
+      return {
+        content: [{ type: "text" as const, text: "Event stream projection stopped successfully" }],
+      }
+    } catch (error) {
+      const content = [{ type: "text" as const, text: `Failed to stop event stream projection with error: ${error}` }]
+
+      return { isError: true, content }
+    }
+  }
+
 // Query Database handler
 export const queryDatabaseHandler =
   () =>
-  ({ query }: { query: string }) => {
+  async ({ query }: { query: string }) => {
     try {
-      const result = queryDatabase(query)
+      const result = await queryDatabase(query)
 
       return {
         content: [
@@ -180,9 +217,9 @@ export const queryDatabaseHandler =
 // Get Stream Info handler
 export const getStreamInfoHandler =
   () =>
-  ({ streamId }: { streamId: string }) => {
+  async ({ streamId }: { streamId: string }) => {
     try {
-      const result = getStreamInfo(streamId)
+      const result = await getStreamInfo(streamId)
 
       return {
         content: [

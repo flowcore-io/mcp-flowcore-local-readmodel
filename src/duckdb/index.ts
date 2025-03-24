@@ -1,25 +1,32 @@
-import { type DuckDBConnection, DuckDBInstance } from "@duckdb/node-api"
+import { type Connection, Database } from "duckdb-async"
 
-let instance: DuckDBInstance | null = null
-let connection: DuckDBConnection | null = null
+let db: Database | null = null
+let connection: Connection | null = null
 
 /**
  * Initializes an in-memory DuckDB database
  * @returns A reference to the initialized database
  */
-export async function initializeDuckDB(databaseFile?: string) {
-  if (instance !== null) {
-    return { success: true, databaseInstance: instance }
-  }
-
+export async function initializeDuckDB(
+  file?: string,
+): Promise<{ success: boolean; databaseInstance?: Database; error?: string }> {
   try {
-    // Create a new DuckDB instance with a persistent database file
-    instance = await DuckDBInstance.create(databaseFile || ":memory:")
-    connection = await instance.connect()
+    // Create a new DuckDB instance with a persistent database file or in-memory
+    db = await Database.create(file || ":memory:")
+    connection = await db.connect()
 
-    return { success: true, databaseInstance: instance }
+    // Verify connection is working
+    await connection.exec("SELECT 1")
+
+    return { success: true, databaseInstance: db }
   } catch (error) {
     return { success: false, error: `Failed to initialize DuckDB: ${error}` }
+  }
+}
+
+export async function closeDuckDB() {
+  if (db) {
+    await db.close()
   }
 }
 
@@ -28,8 +35,8 @@ export async function initializeDuckDB(databaseFile?: string) {
  * @param createTableSQL The SQL CREATE TABLE statement
  * @returns Object indicating success or failure
  */
-export async function createTableWithSQL(createTableSQL: string) {
-  if (!instance || !connection) {
+export async function createTableWithSQL(createTableSQL: string): Promise<{ success: boolean; message: string }> {
+  if (!db || !connection) {
     return {
       success: false,
       message: "Database not initialized. Call initializeDuckDB first.",
@@ -37,8 +44,7 @@ export async function createTableWithSQL(createTableSQL: string) {
   }
 
   try {
-    await connection.run(createTableSQL)
-
+    await connection.exec(createTableSQL)
     return {
       success: true,
       message: "Table created successfully",
@@ -61,8 +67,8 @@ export async function createTableWithSQL(createTableSQL: string) {
 export async function createProjectionTable(
   tableName: string,
   columns: Array<{ name: string; type: string; constraints?: string }>,
-) {
-  if (!instance || !connection) {
+): Promise<{ success: boolean; message: string }> {
+  if (!db || !connection) {
     return {
       success: false,
       message: "Database not initialized. Call initializeDuckDB first.",
@@ -77,7 +83,7 @@ export async function createProjectionTable(
 
     const createTableSQL = `CREATE TABLE IF NOT EXISTS ${tableName} (${columnsSQL})`
 
-    await connection.run(createTableSQL)
+    await connection.exec(createTableSQL)
 
     return {
       success: true,
@@ -97,8 +103,11 @@ export async function createProjectionTable(
  * @param record Record to insert
  * @returns Object indicating success or failure
  */
-export async function insertRecordIntoTable(tableName: string, record: Record<string, unknown>) {
-  if (!instance || !connection) {
+export async function insertRecordIntoTable(
+  tableName: string,
+  record: Record<string, unknown>,
+): Promise<{ success: boolean; message: string }> {
+  if (!db || !connection) {
     return {
       success: false,
       message: "Database not initialized. Call initializeDuckDB first.",
@@ -107,46 +116,35 @@ export async function insertRecordIntoTable(tableName: string, record: Record<st
 
   try {
     const columnNames = Object.keys(record).join(", ")
-    const placeholders = Object.keys(record)
-      .map((_, index) => `$${index + 1}`)
-      .join(", ")
-    const values = Object.values(record)
 
-    const insertSQL = `INSERT INTO ${tableName} (${columnNames}) VALUES (${placeholders})`
-
-    try {
-      const prepared = await connection.prepare(insertSQL)
-
-      // Bind values based on their types
-      values.forEach((value, index) => {
-        const paramIndex = index + 1
-        if (typeof value === "string") {
-          prepared.bindVarchar(paramIndex, value)
-        } else if (typeof value === "number") {
-          if (Number.isInteger(value)) {
-            prepared.bindInteger(paramIndex, value)
-          } else {
-            prepared.bindDouble(paramIndex, value)
-          }
-        } else if (typeof value === "boolean") {
-          prepared.bindBoolean(paramIndex, value)
-        } else if (value === null) {
-          prepared.bindNull(paramIndex)
-        } else if (typeof value === "bigint") {
-          prepared.bindBigInt(paramIndex, value)
-        } else {
-          // For other types, convert to string
-          prepared.bindVarchar(paramIndex, String(value))
+    // Format values according to their type
+    const formattedValues = Object.values(record)
+      .map((value) => {
+        if (value === null) {
+          return "NULL"
         }
-      })
 
-      await prepared.run()
-    } catch (error) {
-      return {
-        success: false,
-        message: `Failed to insert record into ${tableName}: ${error}`,
-      }
-    }
+        if (typeof value === "string") {
+          // Escape single quotes in strings
+          return `'${String(value).replace(/'/g, "''")}'`
+        }
+
+        if (typeof value === "boolean") {
+          return value ? "TRUE" : "FALSE"
+        }
+
+        if (value instanceof Date) {
+          return `'${value.toISOString()}'`
+        }
+
+        return String(value)
+      })
+      .join(", ")
+
+    const insertSQL = `INSERT INTO ${tableName} (${columnNames}) VALUES (${formattedValues})`
+
+    await connection.exec(insertSQL)
+
     return {
       success: true,
       message: `Record inserted into ${tableName} successfully`,
@@ -164,8 +162,10 @@ export async function insertRecordIntoTable(tableName: string, record: Record<st
  * @param query SQL query to execute
  * @returns Object with query results or error
  */
-export async function queryDatabase(query: string) {
-  if (!instance || !connection) {
+export async function queryDatabase(
+  query: string,
+): Promise<{ success: boolean; message: string; results: unknown[] | null }> {
+  if (!db || !connection) {
     return {
       success: false,
       message: "Database not initialized. Call initializeDuckDB first.",
@@ -174,11 +174,12 @@ export async function queryDatabase(query: string) {
   }
 
   try {
-    const result = await connection.run(query)
+    const rows = await connection.all(query)
+
     return {
       success: true,
       message: "Query executed successfully",
-      results: result,
+      results: rows,
     }
   } catch (error) {
     return {
@@ -194,7 +195,7 @@ export async function queryDatabase(query: string) {
  * @returns The database instance or null if not initialized
  */
 export function getDatabaseInstance() {
-  return instance
+  return db
 }
 
 /**
