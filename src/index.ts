@@ -2,7 +2,9 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
+import { spawnSync } from "node:child_process"
 import { parseArgs } from "node:util"
+import os from "node:os"
 import { z } from "zod"
 import pkg from "../package.json"
 import {
@@ -17,6 +19,22 @@ import {
   stopEventStreamProjectionHandler,
 } from "./tools/duckdb-tools"
 import { exchangePat } from "./utils/pat-exchange"
+
+const arch = os.arch()
+const platform = os.platform()
+
+if (platform === "darwin" && arch === "arm64") {
+  // Try native arm64 first
+  try {
+    require("duckdb")
+  } catch (error) {
+    // If native arm64 fails, use Rosetta
+    const result = spawnSync("arch", ["-x86_64", process.execPath, ...process.argv.slice(1)], {
+      stdio: "inherit",
+    })
+    process.exit(result.status)
+  }
+}
 
 // Parse command line arguments
 const { values: parsedValues } = parseArgs({
