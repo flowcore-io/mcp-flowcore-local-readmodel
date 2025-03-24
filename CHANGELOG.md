@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0 (2025-03-24)
+
+
+### Features
+
+* **duckdb:** :sparkles: Add duckdb-async support and enhance DuckDB tools ([1dfad08](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/1dfad08ccdd3756e5b04f49dfa53ae72884e15c2))
+* **initial:** :sparkles: Initialize Flowcore Local Read Model MCP Server with essential files and configurations ([0df6421](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/0df64219a057a1de82e5bdbb5f1a8be522404d36))
+
+
+### Bug Fixes
+
+* **duckdb:** :bug: Ensure proper closure of DuckDB connection ([5957ac6](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/5957ac6a60b0a67d61dcd9f72ccc2530b859fc29))
+
 ## [1.6.0](https://github.com/flowcore-io/mcp-flowcore-platform/compare/v1.5.3...v1.6.0) (2025-03-18)
 
 
