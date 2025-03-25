@@ -23,7 +23,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "rimraf dist && bun run copy-files && bun build ./src/index.ts --outdir ./dist --target node && bun run add-shebang",
+    "build": "rimraf dist && bun run copy-files && bun run scripts/bundle.ts && bun run add-shebang",
     "copy-files": "bun run scripts/copy-files.ts",
     "add-shebang": "bun run scripts/add-shebang.ts",
     "prepublishOnly": "bun run build",
