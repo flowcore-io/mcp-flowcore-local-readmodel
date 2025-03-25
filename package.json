@@ -23,7 +23,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target node && bun run copy-files && bun run add-shebang",
+    "build": "rimraf dist && bun run copy-files && bun build ./src/index.ts --outdir ./dist --target node && bun run add-shebang",
     "copy-files": "bun run scripts/copy-files.ts",
     "add-shebang": "bun run scripts/add-shebang.ts",
     "prepublishOnly": "bun run build",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
+    "rimraf": "^6.0.1",
     "typescript": "^5"
   },
   "peerDependencies": {

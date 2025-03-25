@@ -4,11 +4,13 @@ import { insertRecordIntoTable } from "./index"
 // Store projector functions by name
 const projectors: Record<string, ProjectorInfo> = {}
 
+type ProjectionResult = Record<string, unknown> | (Record<string, unknown>)[]
+
 // Type definition for a projection function
-export type ProjectionFunction = (event: FlowcoreEvent) => Record<string, unknown>
+export type ProjectionFunction = (event: FlowcoreEvent) => ProjectionResult | Promise<ProjectionResult>
 
 // Type definition for any function that could work as a projector
-export type GenericProjectionFunction = (event: Record<string, unknown>) => Record<string, unknown>
+export type GenericProjectionFunction = (event: Record<string, unknown>) => ProjectionResult | Promise<ProjectionResult>
 
 // Type to store projector information
 interface ProjectorInfo {
@@ -95,10 +97,22 @@ export async function projectEvent(event: FlowcoreEvent, targetTable?: string, p
 
   try {
     // Transform the event to a database record
-    const record = projector.function(event)
+    const record = await projector.function(event)
 
     // Only insert if a target table is provided
     if (targetTable) {
+      if (Array.isArray(record)) {
+        // Insert each record into the database
+        const results = await Promise.all(record.map(r => insertRecordIntoTable(targetTable, r)))
+        return {
+          success: results.every(r => r.success),
+          message: results.map(r => r.message).join("\n"),
+          projectorName: projector.name,
+          targetTable,
+          records: record,
+        }
+      } 
+
       // Insert the record into the database
       const result = await insertRecordIntoTable(targetTable, record)
 

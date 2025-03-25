@@ -147,6 +147,9 @@ server.tool(
    - Return null for unmappable fields rather than throwing errors
 
 4. Example Function Structure:
+
+The function must return a single object or an array of objects, it can also return a promise that resolves to a single object or an array of objects.
+
 <example js code>
 function projectEvent(event) {
     return {
