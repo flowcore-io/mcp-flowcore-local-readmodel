@@ -20,9 +20,4 @@ const readme = Bun.file("README.md")
 await Bun.write(join("dist", "README.md"), readme)
 console.log("✅ Copied README.md to dist folder")
 
-// Copy install-duckdb.js to dist folder
-const installDuckdb = Bun.file("scripts/install-duckdb.js")
-await Bun.write(join("dist", "scripts", "install-duckdb.js"), installDuckdb)
-console.log("✅ Copied install-duckdb.js to dist/scripts folder")
-
 console.log("🎉 All files copied successfully!")
