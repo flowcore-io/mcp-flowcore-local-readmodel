@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.1.0...v1.1.1) (2025-03-25)
+
+
+### Bug Fixes
+
+* **package:** :sparkles: Update build script to use bun run for bundling ([02a1a8d](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/02a1a8d87249724fd2d2698f33d11909268febcb))
+* **package:** :sparkles: Update dependencies and add bunfig.toml configuration ([09a950c](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/09a950c585129e324fbaced48c2435ffa69ab239))
+
 ## [1.1.0](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.0.0...v1.1.0) (2025-03-25)
 
 
