@@ -1,6 +1,6 @@
 {
   "name": "@flowcore/local-read-model-mcp-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for creating a local Read Model and feeding it with events from the Flowcore Platform",
   "private": false,
   "type": "module",
@@ -8,8 +8,15 @@
   "bin": {
     "local-read-model-mcp-server": "./dist/index.js"
   },
-  "os": ["linux", "darwin", "win32"],
-  "cpu": ["x64", "arm64"],
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
   "files": [
     "dist",
     "package.json",

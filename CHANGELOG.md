@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.0.0...v1.1.0) (2025-03-25)
+
+
+### Features
+
+* **duckdb:** :sparkles: Add support for native arm64 DuckDB on macOS ([4b27114](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/4b2711416102dfeb802121ad1331915e3e39b7a6))
+
+
+### Bug Fixes
+
+* **bun.lock:** :sparkles: Update biome package with additional optional dependencies for various platforms ([9f206c4](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/9f206c4ba2ac48f4b588a0e9d6d12ce8f7172cc8))
+* **package:** :fire: Remove DuckDB dependencies from package.json ([f9a6373](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/f9a637331b386c5738fff2e48745bd1930833b4e))
+* **package:** :sparkles: Add postinstall script for DuckDB installation and copy script to dist ([f33c36f](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/f33c36f95d3e1f31fefe2857157095ed548782af))
+
 ## 1.0.0 (2025-03-24)
 
 
