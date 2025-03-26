@@ -120,7 +120,7 @@ export const startEventStreamProjectionHandler =
     tenant,
     dataCore,
     flowTypeName,
-    eventTypeName,
+    eventTypeNames,
     startDate,
     endDate,
     projectorName,
@@ -130,7 +130,7 @@ export const startEventStreamProjectionHandler =
     tenant: string
     dataCore: string
     flowTypeName: string
-    eventTypeName: string
+    eventTypeNames: string[]
     startDate: string
     endDate: string
     projectorName: string
@@ -143,7 +143,7 @@ export const startEventStreamProjectionHandler =
         tenant,
         dataCore,
         flowTypeName,
-        eventTypeName,
+        eventTypeNames,
         startDate,
         endDate,
         projectorName,

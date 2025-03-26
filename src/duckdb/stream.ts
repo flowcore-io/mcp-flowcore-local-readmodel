@@ -18,7 +18,7 @@ interface StreamInfo {
   tenant: string
   dataCore: string
   flowTypeName: string
-  eventTypeName: string
+  eventTypeNames: string[]
   startDate: string
   endDate: string
   projectorName: string
@@ -51,7 +51,7 @@ export async function startEventStreamProjection(
   tenant: string,
   dataCore: string,
   flowTypeName: string,
-  eventTypeName: string,
+  eventTypeNames: string[],
   startDate: string,
   endDate: string,
   projectorName: string,
@@ -67,7 +67,7 @@ export async function startEventStreamProjection(
     tenant,
     dataCore,
     flowTypeName,
-    eventTypeName,
+    eventTypeNames,
     startDate,
     endDate,
     projectorName,
@@ -123,7 +123,7 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
         tenant: streamInfo.tenant,
         dataCore: streamInfo.dataCore,
         flowType: streamInfo.flowTypeName,
-        eventTypes: [streamInfo.eventTypeName],
+        eventTypes: streamInfo.eventTypeNames,
       },
       processor: {
         concurrency: streamInfo.maxParallelism || 100,
@@ -146,9 +146,11 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
                 streamInfo.eventCount++
               } else {
                 errorCount++
+                streamInfo.error = `failed to project event ${event.eventId} with error: ${projectionResult.message}`
               }
             } catch (error) {
               errorCount++
+              streamInfo.error = `failed to project event ${event.eventId} with error: ${error}`
             }
           }
         },
@@ -226,7 +228,7 @@ export function getStreamInfo(streamId: string) {
       eventCount: streamInfo.eventCount,
       dataCore: streamInfo.dataCore,
       flowTypeName: streamInfo.flowTypeName,
-      eventTypeName: streamInfo.eventTypeName,
+      eventTypeNames: streamInfo.eventTypeNames,
       startDate: streamInfo.startDate,
       endDate: streamInfo.endDate,
       projectorName: streamInfo.projectorName,
@@ -251,7 +253,7 @@ export function getAllStreams() {
     eventCount: stream.eventCount,
     dataCore: stream.dataCore,
     flowTypeName: stream.flowTypeName,
-    eventTypeName: stream.eventTypeName,
+    eventTypeNames: stream.eventTypeNames,
     projectorName: stream.projectorName,
     targetTable: stream.targetTable,
     processedTimeBuckets: stream.processedTimeBuckets,

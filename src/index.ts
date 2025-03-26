@@ -124,9 +124,10 @@ server.tool(
 
 1. Function Structure:
    - Input: Flowcore event object containing event data
-   - Output: Object matching the projection table schema
+   - Output: Object matching a single projection table schema
    - Must be pure function with no side effects
    - Handle null/undefined values gracefully
+   - Objects or array of object returned must match the projection table schema or it will fail to insert into the database
 
 2. Data Type Formatting Requirements:
    - Timestamps: ISO 8601 format (YYYY-MM-DD'T'HH:mm:ss.sssZ)
@@ -148,6 +149,10 @@ server.tool(
 
 4. Example Function Structure:
 
+input: raw event object from Flowcore
+output: object or array of objects that match the projection table schema
+
+***the function should only handle one table type output, if you need to project to multiple tables you can use the same function multiple times using a switch statement or if statements***
 The function must return a single object or an array of objects, it can also return a promise that resolves to a single object or an array of objects.
 
 <example js code>
@@ -180,7 +185,7 @@ server.tool(
     tenant: z.string().describe("Tenant name"),
     dataCore: z.string().describe("Name of the data core"),
     flowTypeName: z.string().describe("Name of the flow type"),
-    eventTypeName: z.string().describe("Name of the event type"),
+    eventTypeNames: z.array(z.string()).describe("Name of the event types to project, can be multiple event types but only within the same flow type, this will maintain the ordering of the events"),
     startDate: z.string().describe("Start date for event streaming"),
     endDate: z.string().describe("End date for event streaming"),
     projectorName: z.string().describe("Name of the projector to use for events"),
