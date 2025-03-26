@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.1.1...v1.1.2) (2025-03-26)
+
+
+### Bug Fixes
+
+* **package:** :sparkles: Update @flowcore/data-pump to version 0.3.5 ([70350ca](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/70350ca7f18a4006605b67a8b6d0e4e2ae12a846))
+
 ## [1.1.1](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.1.0...v1.1.1) (2025-03-25)
 
 
