@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.2.0...v1.2.1) (2025-05-12)
+
+
+### Bug Fixes
+
+* **index:** :lock: Update event stream projection description for sensitive data handling ([d2c7965](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/d2c79659187238befc1ed3a75204cda653e67782))
+
 ## [1.2.0](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.1.2...v1.2.0) (2025-05-12)
 
 
