@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.1.2...v1.2.0) (2025-05-12)
+
+
+### Features
+
+* bumped sdk and data pump dependencies and added support for sensitive data event streams ([b485973](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/commit/b48597351ecfee49be92e8c1e685a89c4c7a09b4))
+
 ## [1.1.2](https://github.com/flowcore-io/mcp-flowcore-local-readmodel/compare/v1.1.1...v1.1.2) (2025-03-26)
 
 
