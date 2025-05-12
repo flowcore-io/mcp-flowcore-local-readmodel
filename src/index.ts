@@ -180,12 +180,16 @@ module.exports = projectEvent;
 
 server.tool(
   "start_event_stream_projection",
-  "Start streaming events from Flowcore and projecting them to the database, Sensitive data should not be needed, but if you need it ask the user if they are sure they want to include sensitive data, is false by default",
+  "Start streaming events from Flowcore and projecting them to the database, Sensitive data should not be needed as it is masked in a correct format in the response, but if you need it ask the user if they are sure they want to include sensitive data, is **false** by default. **DO NOT** fetch sensitive data from the event type on your own initiative, if you deem it necessary to fetch sensitive data, **ALWAYS** ask the user if they are sure they want to include sensitive data, is **false** by default",
   {
     tenant: z.string().describe("Tenant name"),
     dataCore: z.string().describe("Name of the data core"),
     flowTypeName: z.string().describe("Name of the flow type"),
-    eventTypeNames: z.array(z.string()).describe("Name of the event types to project, can be multiple event types but only within the same flow type, this will maintain the ordering of the events"),
+    eventTypeNames: z
+      .array(z.string())
+      .describe(
+        "Name of the event types to project, can be multiple event types but only within the same flow type, this will maintain the ordering of the events",
+      ),
     startDate: z.string().describe("Start date for event streaming"),
     endDate: z.string().describe("End date for event streaming"),
     projectorName: z.string().describe("Name of the projector to use for events"),
