@@ -180,7 +180,7 @@ module.exports = projectEvent;
 
 server.tool(
   "start_event_stream_projection",
-  "Start streaming events from Flowcore and projecting them to the database",
+  "Start streaming events from Flowcore and projecting them to the database, Sensitive data should not be needed, but if you need it ask the user if they are sure they want to include sensitive data, is false by default",
   {
     tenant: z.string().describe("Tenant name"),
     dataCore: z.string().describe("Name of the data core"),
@@ -195,6 +195,12 @@ server.tool(
       .optional()
       .describe(
         "Maximum number of events to process in parallel (default: 100), this can be used to speed up the projection, but don't increase it too much as it will use more local resources",
+      ),
+    includeSensitiveData: z
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to include sensitive data in the response, CAUTION: This will return sensitive data from the event type, so use with caution, ask the user if they are sure they want to include sensitive data, is false by default",
       ),
   },
   startEventStreamProjectionHandler(async () => exchangePat(username, pat)),

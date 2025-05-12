@@ -30,6 +30,7 @@ interface StreamInfo {
   maxParallelism?: number
   processedTimeBuckets: number
   totalTimeBuckets: number
+  includeSensitiveData?: boolean
 }
 
 /**
@@ -57,6 +58,7 @@ export async function startEventStreamProjection(
   projectorName: string,
   targetTable: string,
   maxParallelism = 5, // Default to 5 parallel time bucket processes
+  includeSensitiveData = false,
 ) {
   const streamId = `stream-${Date.now()}`
 
@@ -75,6 +77,7 @@ export async function startEventStreamProjection(
     maxParallelism,
     processedTimeBuckets: 0,
     totalTimeBuckets: 0,
+    includeSensitiveData,
   }
 
   activeStreams[streamId] = streamInfo
@@ -110,6 +113,7 @@ async function processEventStream(getBearerToken: () => Promise<string>, streamI
     const endState = getState(streamInfo.endDate)
 
     activeDataPumps[streamId] = FlowcoreDataPump.create({
+      includeSensitiveData: streamInfo.includeSensitiveData ?? false,
       auth: {
         getBearerToken: async () => await getBearerToken(),
       },
@@ -238,6 +242,7 @@ export function getStreamInfo(streamId: string) {
       processedTimeBuckets: streamInfo.processedTimeBuckets,
       totalTimeBuckets: streamInfo.totalTimeBuckets,
       maxParallelism: streamInfo.maxParallelism,
+      includeSensitiveData: streamInfo.includeSensitiveData ?? false,
     },
   }
 }
@@ -258,5 +263,6 @@ export function getAllStreams() {
     targetTable: stream.targetTable,
     processedTimeBuckets: stream.processedTimeBuckets,
     totalTimeBuckets: stream.totalTimeBuckets,
+    includeSensitiveData: stream.includeSensitiveData ?? false,
   }))
 }

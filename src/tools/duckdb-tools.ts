@@ -126,6 +126,7 @@ export const startEventStreamProjectionHandler =
     projectorName,
     targetTable,
     maxParallelism,
+    includeSensitiveData,
   }: {
     tenant: string
     dataCore: string
@@ -136,6 +137,7 @@ export const startEventStreamProjectionHandler =
     projectorName: string
     targetTable: string
     maxParallelism?: number
+    includeSensitiveData?: boolean
   }) => {
     try {
       const result = await startEventStreamProjection(
@@ -149,6 +151,7 @@ export const startEventStreamProjectionHandler =
         projectorName,
         targetTable,
         maxParallelism,
+        includeSensitiveData,
       )
 
       return {
