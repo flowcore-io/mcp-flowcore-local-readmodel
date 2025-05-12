@@ -1,6 +1,6 @@
 {
   "name": "@flowcore/local-read-model-mcp-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP server for creating a local Read Model and feeding it with events from the Flowcore Platform",
   "private": false,
   "type": "module",
